@@ -1,5 +1,7 @@
 import { readFile, writeFile } from 'fs';
 import {BookInterface} from "./interfaces/book.interface";
+import {LibraryDataset, LibraryInterface} from "./interfaces/library.interface";
+import {DatasetInterface} from "./interfaces/dataset.interface";
 
 const write = (file, data) => {
   writeFile(`output/${file}`,
@@ -24,10 +26,33 @@ readFile(`./input/${file}`, (err, data) => {
   }
 
   const dataToString = data.toString();
-  const [baseDatasetInterfaceLine, booksScore, ...libraries] = dataToString.split('\n');
+  const [baseDatasetInterfaceLine, booksScoreLine, ...librariesLine] = dataToString.split('\n');
   const [numberOfBooks, numberOfLibraries, daysForScanning] = baseDatasetInterfaceLine.split(' ').map(n => Number(n));
-  const books: BookInterface[] = booksScore.split(' ').map((score, id) => ({ id, score: Number(score) }));
+  const books: BookInterface[] = booksScoreLine.split(' ').map((score, id) => ({ id, score: Number(score) }));
 
-  console.log(books);
+  const libraries: LibraryInterface[] = [];
+  for (let i = 0; i <= numberOfLibraries; i++) {
+    const [numberOfBooks, signUpProcessDays, booksShipForDay] = librariesLine[i].split(' ');
+    libraries.push({
+      dataset: {
+        numberOfBooks: Number(numberOfBooks),
+        signUpProcessDays: Number(signUpProcessDays),
+        booksShipForDay: Number(booksShipForDay),
+      },
+      books: librariesLine[i + 1]
+        .split(' ')
+        .map((bookId) => books.find(b => b.id === Number(bookId))),
+    });
+  }
+
+  const dataset: DatasetInterface = {
+    numberOfBooks,
+    numberOfLibraries,
+    daysForScanning,
+    libraries,
+    books,
+  };
+
+  console.log(dataset);
 });
 
