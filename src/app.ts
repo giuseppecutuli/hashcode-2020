@@ -1,14 +1,5 @@
 import { readFile, writeFile } from 'fs';
-
-const read = (file) => {
-  return readFile(`./input/${file}`, (err, data) => {
-    if (err) {
-      throw 'Error while reading the file';
-    }
-
-    return data;
-  });
-};
+import {BookInterface} from "./interfaces/book.interface";
 
 const write = (file, data) => {
   writeFile(`output/${file}`,
@@ -27,7 +18,16 @@ const file = 'a_example.txt';
 // const file = 'e_so_many_books.txt';
 // const file = 'f_libraries_of_the_world.txt';
 
-const data = read(file);
+readFile(`./input/${file}`, (err, data) => {
+  if (err) {
+    throw 'Error while reading the file';
+  }
 
-console.log(data);
+  const dataToString = data.toString();
+  const [baseDatasetInterfaceLine, booksScore, ...libraries] = dataToString.split('\n');
+  const [numberOfBooks, numberOfLibraries, daysForScanning] = baseDatasetInterfaceLine.split(' ').map(n => Number(n));
+  const books: BookInterface[] = booksScore.split(' ').map((score, id) => ({ id, score: Number(score) }));
+
+  console.log(books);
+});
 

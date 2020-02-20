@@ -1,26 +1,28 @@
 {
   "name": "hashcode-2020",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/app.ts",
-  "scripts": {
-    "start": "tsc && node --experimental-modules src/app.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "version": "0.0.0",
+  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "engines": {
+    "node": ">= 12.13 <13"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/giuseppecutuli/hashcode-2020.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/giuseppecutuli/hashcode-2020/issues"
-  },
-  "type": "module",
-  "homepage": "https://github.com/giuseppecutuli/hashcode-2020#readme",
   "devDependencies": {
-    "@types/node": "^13.7.4",
-    "tslint": "^6.0.0",
-    "typescript": "^3.7.5"
+    "@types/node": "~12.12.27",
+    "@typescript-eslint/eslint-plugin": "~2.19.2",
+    "@typescript-eslint/parser": "~2.19.2",
+    "eslint": "~6.8.0",
+    "eslint-config-prettier": "~6.10.0",
+    "eslint-plugin-jest": "~23.7.0",
+    "prettier": "~1.19.1",
+    "tsutils": "~3.17.0",
+    "typescript": "~3.7.5"
+  },
+  "scripts": {
+    "start": "tsc -p tsconfig.release.json && node build/src/app.js",
+    "start:watch": "tsc -w -p tsconfig.release.json"
+  },
+  "author": "hashcode-2020",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "tslib": "~1.10.0"
   }
 }
