@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'fs';
 import {BookInterface} from "./interfaces/book.interface";
-import {LibraryDataset, LibraryInterface} from "./interfaces/library.interface";
-import {DatasetInterface} from "./interfaces/dataset.interface";
+import {LibraryInterface} from "./interfaces/library.interface";
+import {Dataset} from "./interfaces/dataset.interface";
 
 const write = (file, data) => {
   writeFile(`output/${file}`,
@@ -20,32 +20,34 @@ const file = 'a_example.txt';
 // const file = 'e_so_many_books.txt';
 // const file = 'f_libraries_of_the_world.txt';
 
+const orderByBestSignUpTime = (dataset: Dataset) => {
+  return dataset.libraries.sort((a, b) => a.signUpProcessDays - b.signUpProcessDays);
+};
+
 readFile(`./input/${file}`, (err, data) => {
   if (err) {
     throw 'Error while reading the file';
   }
 
   const dataToString = data.toString();
-  const [baseDatasetInterfaceLine, booksScoreLine, ...librariesLine] = dataToString.split('\n');
+  const [baseDatasetInterfaceLine, booksScoreLine, ...librariesLine] = dataToString.split('\n').filter(x => x != '');
   const [numberOfBooks, numberOfLibraries, daysForScanning] = baseDatasetInterfaceLine.split(' ').map(n => Number(n));
   const books: BookInterface[] = booksScoreLine.split(' ').map((score, id) => ({ id, score: Number(score) }));
 
   const libraries: LibraryInterface[] = [];
-  for (let i = 0; i <= numberOfLibraries; i++) {
+  for (let i = 0; i < numberOfLibraries * 2; i+=2) {
     const [numberOfBooks, signUpProcessDays, booksShipForDay] = librariesLine[i].split(' ');
     libraries.push({
-      dataset: {
-        numberOfBooks: Number(numberOfBooks),
-        signUpProcessDays: Number(signUpProcessDays),
-        booksShipForDay: Number(booksShipForDay),
-      },
+      numberOfBooks: Number(numberOfBooks),
+      signUpProcessDays: Number(signUpProcessDays),
+      booksShipForDay: Number(booksShipForDay),
       books: librariesLine[i + 1]
         .split(' ')
         .map((bookId) => books.find(b => b.id === Number(bookId))),
     });
   }
 
-  const dataset: DatasetInterface = {
+  const dataset: Dataset = {
     numberOfBooks,
     numberOfLibraries,
     daysForScanning,
@@ -53,6 +55,6 @@ readFile(`./input/${file}`, (err, data) => {
     books,
   };
 
-  console.log(dataset);
+  console.log(orderByBestSignUpTime(dataset));
 });
 
