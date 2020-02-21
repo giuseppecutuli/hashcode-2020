@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'fs';
+import {readFile, writeFile} from 'fs';
 import {BookInterface} from "./interfaces/book.interface";
 import {LibraryInterface} from "./interfaces/library.interface";
 import {Dataset} from "./interfaces/dataset.interface";
@@ -21,10 +21,62 @@ const file = 'a_example.txt';
 // const file = 'f_libraries_of_the_world.txt';
 
 const orderByBestSignUpTime = (dataset: Dataset) => {
-  return dataset.libraries.sort((a, b) => a.signUpProcessDays - b.signUpProcessDays);
+  dataset.libraries = dataset.libraries.sort((a, b) => a.signUpProcessDays - b.signUpProcessDays);
+  return dataset;
 };
 
-readFile(`./input/${file}`, (err, data) => {
+const process = (dataset: Dataset) => {
+  let daysPassed = 0;
+  let libraryInSignUpProcessDaysPassed = 0;
+  let libraryInSignUpProcess = dataset.libraries[0];
+  let numberOfLibraries = 0;
+  let currentLibraries = [];
+  const libraries = {};
+
+  while (daysPassed < dataset.daysForScanning) {
+    if (libraryInSignUpProcessDaysPassed === libraryInSignUpProcess.signUpProcessDays) {
+      currentLibraries.push(libraryInSignUpProcess);
+      libraryInSignUpProcess = dataset.libraries[numberOfLibraries];
+      libraryInSignUpProcessDaysPassed = 0;
+      numberOfLibraries++;
+    } else {
+      libraryInSignUpProcessDaysPassed += 1;
+    }
+
+    if (currentLibraries.length) {
+      currentLibraries.forEach((currentLibrary: LibraryInterface, index) => {
+        const bookForThisDay = currentLibraries[index].books.length < currentLibrary.booksShipForDay
+          ? currentLibraries[index].books.length
+          : currentLibrary.booksShipForDay;
+
+        const deletedBooks = currentLibrary.books.splice(0, bookForThisDay);
+
+        if (libraries[currentLibrary.id] === undefined) {
+          libraries[currentLibrary.id] = { books: [] };
+        }
+
+        libraries[currentLibrary.id] = {
+          books: [
+            ...libraries[currentLibrary.id].books,
+            ...deletedBooks,
+          ],
+        };
+
+        if (currentLibraries[index].books.length === 0) {
+          delete currentLibraries[index];
+        }
+      });
+    }
+
+    daysPassed += 1;
+  }
+
+  return libraries;
+};
+
+readFile(`./input/${file}`, async (err, data) => {
+  console.time();
+
   if (err) {
     throw 'Error while reading the file';
   }
@@ -38,6 +90,7 @@ readFile(`./input/${file}`, (err, data) => {
   for (let i = 0; i < numberOfLibraries * 2; i+=2) {
     const [numberOfBooks, signUpProcessDays, booksShipForDay] = librariesLine[i].split(' ');
     libraries.push({
+      id: i / 2,
       numberOfBooks: Number(numberOfBooks),
       signUpProcessDays: Number(signUpProcessDays),
       booksShipForDay: Number(booksShipForDay),
@@ -55,6 +108,14 @@ readFile(`./input/${file}`, (err, data) => {
     books,
   };
 
-  console.log(orderByBestSignUpTime(dataset));
+  const resultLibraries = process(orderByBestSignUpTime(dataset));
+
+  let out = '';
+  Object.keys(resultLibraries).forEach((id) => {
+    out += `${id} ${resultLibraries[id].books.length}\n${resultLibraries[id].books.map((book: BookInterface) => book.id).join(' ')}\n`;
+  });
+
+  await write(file, `${Object.keys(resultLibraries).length}\n${out}`);
+  console.timeEnd();
 });
 
